@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot UI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+  <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div class="w-full max-w-md p-4 bg-white rounded-2xl shadow-lg">
+      <h1 class="text-xl font-bold mb-4">Chatbot</h1>
+      <div class="mb-4">
+        <input
+          type="text"
+          placeholder="Enter User ID"
+          id="userId"
+          class="w-full mb-2 p-2 border rounded"
+        />
+        <input
+          type="text"
+          placeholder="Enter your message"
+          id="message"
+          class="w-full mb-2 p-2 border rounded"
+        />
+        <button
+          onclick="handleSendMessage()"
+          class="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Send Message
+        </button>
+      </div>
+      <div class="mt-4">
+        <h2 class="text-lg font-semibold">Chat History</h2>
+        <div id="chatHistory" class="mt-2 bg-gray-50 p-2 rounded max-h-64 overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const chatHistory = [];
+    const backendUrl = "http://127.0.0.1:8000/chat"; // Replace with your backend URL
+
+    async function handleSendMessage() {
+      const userId = document.getElementById('userId').value;
+      const message = document.getElementById('message').value;
+
+      if (userId && message) {
+        try {
+          const response = await fetch(backendUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user: userId, message }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          const botResponse = data.responses[0];
+
+          // Update chat history
+          chatHistory.push({ userId, message });
+          chatHistory.push({ userId: "Bot", message: botResponse });
+
+          document.getElementById('message').value = '';
+          renderChatHistory();
+        } catch (error) {
+          console.error("Failed to send message:", error);
+          alert("Failed to connect to the server. Please try again.");
+        }
+      } else {
+        alert("Please enter both User ID and a message.");
+      }
+    }
+
+    function renderChatHistory() {
+      const chatHistoryDiv = document.getElementById('chatHistory');
+      chatHistoryDiv.innerHTML = '';
+
+      chatHistory.forEach((chat, index) => {
+        const chatDiv = document.createElement('div');
+        chatDiv.classList.add('mb-2');
+
+        const chatMessage = document.createElement('p');
+        chatMessage.classList.add('text-sm', 'text-gray-600');
+        chatMessage.innerHTML = `<span class="font-bold">${chat.userId}:</span> ${chat.message}`;
+
+        chatDiv.appendChild(chatMessage);
+        chatHistoryDiv.appendChild(chatDiv);
+      });
+    }
+  </script>
+</body>
+</html>
