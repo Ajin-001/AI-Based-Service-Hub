@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="/static/css/register.css">
+</head>
+<body>
+    <div class="register-container">
+        <h2>Register</h2>
+        <form id="registerForm">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Register</button>
+            <p>Already have an account? <a href="/login">Login</a></p>
+        </form>
+        <p id="registerMessage"></p>
+    </div>
+
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const username = document.getElementById("username").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const messageBox = document.getElementById("registerMessage");
+
+            if (!username || !email || !password) {
+                messageBox.textContent = "All fields are required!";
+                messageBox.style.color = "red";
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const result = await response.json();
+                messageBox.textContent = result.message;
+                messageBox.style.color = response.ok ? "green" : "red";
+
+                if (response.ok) {
+                    setTimeout(() => {
+                        window.location.href = "/login";  // Redirect to login page
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                messageBox.textContent = "Something went wrong!";
+                messageBox.style.color = "red";
+            }
+        });
+    </script>
+</body>
+</html>

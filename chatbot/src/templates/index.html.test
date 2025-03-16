@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Service Chat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #1a365d;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .message-container {
+      display: flex;
+      align-items: flex-start;
+      margin: 1rem 0;
+      gap: 1rem;
+    }
+
+    .message-bubble {
+      padding: 1rem;
+      border-radius: 1rem;
+      max-width: 100%;
+    }
+
+    .user-message {
+      background: #4a90e2;
+      margin-left: auto;
+    }
+
+    .bot-message {
+      background: #2d3748;
+    }
+
+    .user-icon,
+    .bot-icon {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .user-icon {
+      background: #4a90e2;
+    }
+
+    .bot-icon {
+      background: #2d3748;
+    }
+
+    .chat-history-box {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .text-black {
+      color: #000000;
+    }
+
+    .logout-bg {
+      background: #0f0e4d;
+    }
+
+    .text-box-border {
+      border: 1px solid #f7f7f785;
+    }
+
+    .text-result-color {
+      background: rgb(255, 255, 255);
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: black;
+    }
+
+    .text-box {
+      background: rgb(255, 255, 255);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: black;
+    }
+  </style>
+</head>
+
+<body class="min-h-[80vh] flex items-center justify-center p-4">
+  <!-- Welcome Page -->
+  <div id="welcomePage" class="w-full max-w-sm">
+    <div class="glass rounded-3xl p-8 text-white">
+      <h1 class="text-3xl font-bold mb-2">Welcome!</h1>
+      <p class="text-gray-300 mb-8">Customer Service Portal</p>
+
+      <button onclick="showLoginPage()"
+        class="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-full py-3 mb-4 transition-all duration-300">
+        SIGN IN
+      </button>
+
+      <button onclick="showSignUpPage()"
+        class="w-full border border-white/30 hover:bg-white/10 text-white rounded-full py-3 transition-all duration-300">
+        SIGN UP
+      </button>
+    </div>
+  </div>
+
+  <!-- Login Page -->
+  <div id="loginPage" class="hidden w-full max-w-sm">
+    <div class="glass rounded-3xl p-8 text-white">
+      <h1 class="text-3xl font-bold mb-8">Sign In</h1>
+
+      <form onsubmit="handleLogin(event)" class="space-y-4 mb-6">
+        <input type="email" placeholder="example@mail.com" id="loginEmail"
+          class="w-full glass-input rounded-full py-3 px-6 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+        <div class="relative">
+          <input type="password" placeholder="••••••••" id="loginPassword"
+            class="w-full glass-input rounded-full py-3 px-6 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <button type="button" onclick="togglePasswordVisibility('loginPassword')"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white">
+            👁️
+          </button>
+        </div>
+
+        <button type="submit"
+          class="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-full py-3 mb-4 transition-all duration-300">
+          SIGN IN
+        </button>
+      </form>
+
+      <div class="text-center space-y-4">
+        <p class="text-sm text-gray-300">
+          <a href="#" class="hover:text-white transition-colors">Forgot password?</a>
+        </p>
+
+        <p class="text-sm text-gray-300">
+          Don't have an account?
+          <a href="#" onclick="showSignUpPage()" class="text-blue-400 hover:text-blue-300 transition-colors">Sign up</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sign Up Page -->
+  <div id="signUpPage" class="hidden w-full max-w-sm">
+    <div class="glass rounded-3xl p-8 text-white">
+      <h1 class="text-3xl font-bold mb-8">Create Account</h1>
+
+      <form onsubmit="handleSignUp(event)" class="space-y-4 mb-6">
+        <input type="text" placeholder="Username" id="signUpUsername"
+          class="w-full glass-input rounded-full py-3 px-6 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+        <input type="email" placeholder="example@mail.com" id="signUpEmail"
+          class="w-full glass-input rounded-full py-3 px-6 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+        <div class="relative">
+          <input type="password" placeholder="••••••••" id="signUpPassword"
+            class="w-full glass-input rounded-full py-3 px-6 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <button type="button" onclick="togglePasswordVisibility('signUpPassword')"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white">
+            👁️
+          </button>
+        </div>
+
+        <button type="submit"
+          class="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-full py-3 mb-4 transition-all duration-300">
+          SIGN UP
+        </button>
+      </form>
+
+      <p class="text-sm text-center text-gray-300">
+        Already have an account?
+        <a href="#" onclick="showLoginPage()" class="text-blue-400 hover:text-blue-300 transition-colors">Sign in</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Chatbot Page -->
+  <div id="chatbotPage" class="w-full max-w-2xl max-h-[1000px] overflow-y-auto p-4 rounded-lg shadow">
+    <div class="glass rounded-3xl p-8 text-white">
+      <h1 class="text-3xl font-bold mb-8">🤖 Virtual Assistant</h1>
+
+      <div id="chatMessages" class="flex-1 overflow-y-auto mb-4 p-4">
+        <!-- Messages will be inserted here -->
+      </div>
+
+      <div class="relative bg-gray-700 text-box-border rounded-xl p-2">
+        <textarea id="message" placeholder="Type your question here..."
+          class="w-full bg-transparent text-white placeholder-gray-400 focus:outline-none resize-none py-2 px-4 pr-24"
+          rows="1" onkeydown="handleKeyPress(event)"></textarea>
+        <button onclick="handleSendMessage()"
+          class="absolute right-4 button-6 px-6 py-2 bg-blue-600 hover:bg-blue-600 text-white rounded-full transition-all duration-300">
+          Send
+        </button>
+      </div>
+
+      <button onclick="showStringProcessPage()"
+        class="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-full py-3 mt-4 transition-all duration-300">
+        Locate Nearby Services
+      </button>
+    </div>
+  </div>
+
+  <!-- String Processor Page -->
+  <div id="stringProcessPage" class="w-full max-w-lg max-h-[750px]">
+    <div class="glass rounded-3xl p-6 text-white">
+      <h1 class="text-2xl font-bold mb-6 text-center">Find a Service Center</h1>
+
+      <div class="space-y-4">
+        <!-- Small Input for Service Provider -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Enter service provider name...</label>
+          <input id="serviceProvider"
+            class="w-full text-box rounded-xl p-3 h-10 break-words"
+            placeholder="Enter service provider..." />
+        </div>
+
+        <!-- Small Input for Location -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Enter your location...</label>
+          <input id="inputString"
+            class="w-full text-box rounded-xl p-3 h-10 break-words"
+            placeholder="Enter your location..." />
+        </div>
+
+        <!-- Process Button -->
+        <button onclick="locationFinder()"
+          class="w-full bg-blue-500 hover:bg-blue-600 text-black rounded-full py-3 transition-all duration-300">
+          Find Nearest Location
+        </button>
+
+        <!-- Large Output Box -->
+        <div>
+          <label class="block text-sm font-medium mb-1"></label>
+          <div id="outputString"
+            class="w-full text-result-color rounded-xl p-4 min-h-[200px] max-h-[300px] overflow-y-auto break-words">
+            Results will appear here...
+          </div>
+        </div>
+
+        <!-- Back Button -->
+        <button onclick="showChatbotPage()"
+          class="w-full bg-gray-500 hover:bg-gray-600 text-white rounded-full py-3 mt-2 transition-all duration-300">
+          💬 Return to Chat
+        </button>
+
+        <!-- Schedule Appointment Button -->
+        <button onclick="showAppointmentPage()"
+          class="w-full bg-green-500 hover:bg-green-600 text-white rounded-full py-3 mt-2 transition-all duration-300">
+          📅 Book an Appointment
+        </button>
+
+        <!-- Logout Button -->
+        <button onclick="logout()"
+          class="w-full bg-red-500 hover:bg-red-600 text-white rounded-full py-3 mt-2 transition-all duration-300">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Appointment Page -->
+  <div id="appointmentPage" class="w-full max-w-lg max-h-[700px]">
+    <div class="glass rounded-3xl p-6 text-white">
+      <h1 class="text-2xl font-bold mb-6 text-center">📅 Appointment Scheduler</h1>
+
+      <div class="space-y-4">
+        <!-- Input for Place -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Enter location</label>
+          <input id="appointmentPlace"
+            class="w-full text-box rounded-xl p-3 h-10 break-words"
+            placeholder="Enter place..." />
+        </div>
+
+        <!-- Input for Service Provider -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Enter provider name...</label>
+          <input id="appointmentServiceProvider"
+            class="w-full text-box rounded-xl p-3 h-10 break-words"
+            placeholder="Enter service provider..." />
+        </div>
+
+        <!-- Input for Service -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Enter type of service...</label>
+          <input id="appointmentService"
+            class="w-full text-box rounded-xl p-3 h-10 break-words"
+            placeholder="Enter service..." />
+        </div>
+
+        <!-- Input for Date -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Select appointment date...</label>
+          <input id="appointmentDate"
+            class="w-full text-box rounded-xl p-3 h-10 break-words" />
+        </div>
+
+        <!-- Input for Time -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Select appointment time...</label>
+          <input id="appointmentTime"
+            class="w-full text-box rounded-xl p-3 h-10 break-words" />
+        </div>
+
+        <!-- Submit Button -->
+        <button onclick="scheduleAppointment()"
+          class="w-full bg-blue-500 hover:bg-blue-600 text-black rounded-full py-3 transition-all duration-300">
+          📅 Confirm Appointment
+        </button>
+
+        <!-- Output Box -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Your appointment details will be displayed here after scheduling</label>
+          <div id="appointmentOutput"
+            class="w-full text-result-color rounded-xl p-4 min-h-[75px] max-h-[75px] overflow-y-auto break-words">
+            Appointment status will appear here...
+          </div>
+        </div>
+
+        <!-- Back Button -->
+        <button onclick="showStringProcessPage()"
+          class="w-full bg-gray-500 hover:bg-gray-600 text-white rounded-full py-3 mt-2 transition-all duration-300">
+          ⬅️ Return to Location Finder
+        </button>
+
+        <!-- Logout Button -->
+        <button onclick="logout()"
+          class="w-full bg-red-500 hover:bg-red-600 text-white rounded-full py-3 mt-2 transition-all duration-300">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const backendUrl = "http://127.0.0.1:8000";
+    let chatHistory = [];
+
+    function hideAllPages() {
+      document.getElementById("welcomePage").classList.add("hidden");
+      document.getElementById("loginPage").classList.add("hidden");
+      document.getElementById("signUpPage").classList.add("hidden");
+      document.getElementById("chatbotPage").classList.add("hidden");
+      document.getElementById("stringProcessPage").classList.add("hidden");
+      document.getElementById("appointmentPage").classList.add("hidden");
+    }
+
+    function showSignUpPage() {
+      hideAllPages();
+      document.getElementById('signUpPage').classList.remove('hidden');
+    }
+
+    function showLoginPage() {
+      hideAllPages();
+      document.getElementById('loginPage').classList.remove('hidden');
+    }
+
+    function showChatbotPage() {
+      hideAllPages();
+      document.getElementById('chatbotPage').classList.remove('hidden');
+    }
+
+    function showStringProcessPage() {
+      hideAllPages();
+      document.getElementById('stringProcessPage').classList.remove('hidden');
+    }
+
+    function showAppointmentPage() {
+      hideAllPages();
+      document.getElementById('appointmentPage').classList.remove('hidden');
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      hideAllPages();
+      document.getElementById("welcomePage").classList.remove("hidden");
+    });
+
+    function togglePasswordVisibility(id) {
+      const passwordField = document.getElementById(id);
+      passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        handleSendMessage();
+      }
+    }
+
+    async function handleSignUp(event) {
+      event.preventDefault();
+      const username = document.getElementById('signUpUsername').value;
+      const email = document.getElementById('signUpEmail').value;
+      const password = document.getElementById('signUpPassword').value;
+
+      if (username && email && password) {
+        try {
+          const response = await fetch(`${backendUrl}/signup`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, email, password }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          alert("Sign Up successful! Please login.");
+          showLoginPage();
+        } catch (error) {
+          console.error("Failed to sign up:", error);
+          alert("Failed to sign up. Please try again.");
+        }
+      } else {
+        alert("Please fill in all fields.");
+      }
+    }
+
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      if (email && password) {
+        try {
+          const response = await fetch(`${backendUrl}/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log(data.user_id)
+          localStorage.setItem("user_id", data.user_id);
+          
+          showChatbotPage();
+        } catch (error) {
+          console.error("Failed to log in:", error);
+          alert("Invalid email or password.");
+        }
+      } else {
+        alert("Please enter both email and password.");
+      }
+    }
+
+    async function handleSendMessage() {
+      const messageInput = document.getElementById('message');
+      const message = messageInput.value.trim();
+
+      if (message) {
+        addMessageToChat('user', message);
+        messageInput.value = '';
+
+        try {
+          const response = await fetch(`${backendUrl}/chat`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          const botResponse = data.responses && data.responses.length > 0
+            ? data.responses[0]
+            : 'I apologize, but I am unable to process your request at the moment.';
+
+          addMessageToChat('bot', botResponse);
+
+          chatHistory.push({ userId: "User", message });
+          chatHistory.push({ userId: "Bot", message: botResponse });
+          renderChatHistory();
+        } catch (error) {
+          console.error("Failed to send message:", error);
+        }
+      }
+    }
+
+    function addMessageToChat(type, message) {
+      const chatMessages = document.getElementById('chatMessages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message-container';
+
+      if (type === 'user') {
+        messageDiv.innerHTML = `
+          <div class="flex-1"></div>
+          <div class="message-bubble user-message">
+            <p>${message}</p>
+          </div>
+          <div class="user-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        `;
+      } else {
+        messageDiv.innerHTML = `
+          <div class="bot-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+              <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
+            </svg>
+          </div>
+          <div class="message-bubble bot-message">
+            <p>${message}</p>
+          </div>
+          <div class="flex-1"></div>
+        `;
+      }
+
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    async function locationFinder() {
+      const serviceProvider = document.getElementById('serviceProvider').value.trim();
+      const inputString = document.getElementById('inputString').value.trim();
+      const outputDiv = document.getElementById("outputString"); 
+
+      if (!serviceProvider || !inputString) {
+        alert('Please enter both service provider and location');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${backendUrl}/location/${encodeURIComponent(inputString)}/${encodeURIComponent(serviceProvider)}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.location_data) {
+          outputDiv.innerHTML = `  
+            <p><strong>Service provider:</strong> ${data.location_data.name}</p>
+            <p><strong>Center Name:</strong> ${data.location_data.location_name}</p>
+            <p><strong>Contact:</strong> ${data.location_data.contact}</p>
+            <p><strong>Address:</strong> ${data.location_data.address}</p>
+            <p><strong>City:</strong> ${data.location_data.city}</p>
+            <p><strong>Maps Link:</strong> <a href="${data.location_data.maps_link}" target="_blank">View on Google Maps</a></p>
+          `;
+        } else {
+          outputDiv.textContent = 'No location received';
+        }
+      } catch (error) {
+        console.error('Failed to process string:', error);
+        outputDiv.textContent = 'Error processing string. Please try again.';
+      }
+    }
+
+    async function scheduleAppointment() {
+      const place = document.getElementById('appointmentPlace').value.trim();
+      const serviceProvider = document.getElementById('appointmentServiceProvider').value.trim();
+      const service = document.getElementById('appointmentService').value.trim();
+      const date = document.getElementById('appointmentDate').value.trim();
+      const time = document.getElementById('appointmentTime').value.trim();
+
+      user_id = localStorage.getItem("user_id");
+      console.log(user_id)
+
+      const outputDiv = document.getElementById("appointmentOutput");
+      
+
+      // Validate fields
+      if (!place || !serviceProvider || !service || !date || !time || !user_id) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      try {
+        // Log the payload for debugging
+        const payload = {
+          place: place,
+          service_provider: serviceProvider,
+          service: service,
+          date: date,
+          time: time,
+          user_id:user_id
+        };
+        console.log(JSON.stringify(payload));
+
+        // Send the request
+        const response = await fetch(`${backendUrl}/schedule_appointment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        // Handle response
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log(data.message)
+        // outputDiv.textContent = data.message;
+        outputDiv.innerHTML = `  
+            <p><strong>${data.message}</strong></p>
+            <p>Date:<strong>${date}</strong></p>
+            <p>Time:<strong>${time}</strong></p>
+          `;
+      } catch (error) {
+        console.error('Failed to schedule appointment:', error);
+        outputDiv.textContent = 'Error scheduling appointment. Please try again.';
+      }
+    }
+    
+
+    function logout() {
+      hideAllPages();
+      chatHistory = [];
+      renderChatHistory();
+      document.getElementById("welcomePage").classList.remove("hidden");
+    }
+
+  </script>
+</body>
+
+</html>

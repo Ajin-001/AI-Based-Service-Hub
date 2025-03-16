@@ -1,0 +1,208 @@
+from flask import Flask, render_template, request, redirect, session, flash, jsonify
+import mysql.connector
+from database import get_db_connection
+from werkzeug.security import generate_password_hash, check_password_hash
+import json
+from difflib import get_close_matches
+import requests  # Using requests to call the online chatbot API
+
+app = Flask(__name__)
+app.secret_key = "your_secret_key"  # Change this for security
+
+# Online Chatbot API URL
+CHATBOT_URL = "https://chatgpt.com/g/g-8LGMliw8X-smart-phone-repairman"
+
+def get_model_response(user_input):
+    """
+    Fetches chatbot response from the online GPT-powered bot.
+    """
+    try:
+        response = requests.post(CHATBOT_URL, json={"message": user_input})
+        if response.status_code == 200:
+            return response.json().get("response", "I'm not sure. Can you describe the issue in more detail?")
+        else:
+            return "⚠️ Error: Unable to connect to the chatbot service."
+    except Exception as e:
+        return f"⚠️ Error: {str(e)}"
+
+# Load chatbot responses from JSON (for fallback)
+with open("chatbot_base.json", "r") as file:
+    chatbot_data = json.load(file)
+
+def get_response(user_input):
+    """
+    Matches user input with predefined JSON responses.
+    """
+    user_input = user_input.lower()
+    possible_matches = get_close_matches(user_input, [entry["user_message"] for entry in chatbot_data], n=1, cutoff=0.6)
+    
+    if possible_matches:
+        for entry in chatbot_data:
+            if entry["user_message"] == possible_matches[0]:
+                return entry["bot_response"]
+    
+    return None  # Return None if no close match is found
+
+def get_nearby_service_centers(location):
+    """
+    Fetches service centers from MySQL based on user location.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    query = "SELECT * FROM service_centers WHERE place LIKE %s ORDER BY rating DESC LIMIT 3"
+    cursor.execute(query, ("%" + location + "%",))
+    centers = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    
+    return centers
+
+def store_feedback(user_id, service_center_id, rating, comment):
+    """
+    Stores user feedback about a service center.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    query = "INSERT INTO reviews (user_id, service_center_id, rating, comment) VALUES (%s, %s, %s, %s)"
+    cursor.execute(query, (user_id, service_center_id, rating, comment))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+# 🟢 Home Page
+@app.route("/")
+def home():
+    return redirect("/login")
+
+# 🟢 Registration Page Route
+@app.route("/register", methods=["GET"])
+def register():
+    return render_template("register.html")
+
+# 🟢 API Route for User Registration
+@app.route("/api/register", methods=["POST"])
+def api_register():
+    try:
+        data = request.get_json()
+        if not data or "username" not in data or "email" not in data or "password" not in data:
+            return jsonify({"message": "Invalid request!"}), 400
+
+        username, email, password = data["username"], data["email"], data["password"]
+        hashed_password = generate_password_hash(password)
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM auth WHERE email=%s", (email,))
+        if cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return jsonify({"message": "Email already registered!"}), 400
+
+        cursor.execute("INSERT INTO auth (username, email, password_hash) VALUES (%s, %s, %s)", 
+                       (username, email, hashed_password))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({"message": "Registration successful! Please login."}), 200
+    except Exception as e:
+        return jsonify({"message": "Server error!", "error": str(e)}), 500
+
+# 🟢 Login Page
+@app.route("/login", methods=["GET"])
+def login():
+    return render_template("login.html")
+
+# 🟢 API Route for User Login
+@app.route("/api/login", methods=["POST"])
+def api_login():
+    try:
+        data = request.get_json()
+        if not data or "email" not in data or "password" not in data:
+            return jsonify({"message": "Invalid request!"}), 400
+
+        email, password = data["email"], data["password"]
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM auth WHERE email=%s", (email,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if user and check_password_hash(user["password_hash"], password):
+            session["user_id"] = user["id"]
+            session["username"] = user["username"]
+            return jsonify({"message": "Login successful!"}), 200
+        else:
+            return jsonify({"message": "Invalid credentials!"}), 401
+    except Exception as e:
+        return jsonify({"message": "Server error!", "error": str(e)}), 500
+
+# 🔹 Chatbot API Route
+@app.route("/api/chatbot", methods=["POST"])
+def chatbot_api():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    user_id = session["user_id"]
+    data = request.get_json()
+    user_input = data.get("message", "").strip()
+
+    if not user_input:
+        return jsonify({"response": "Please enter a valid message."})
+
+    # Try fetching response from online chatbot
+    bot_response = get_model_response(user_input)
+
+    # If chatbot can't find a response, ask for location if issue persists
+    if not bot_response or len(bot_response) < 5:
+        bot_response = get_response(user_input)
+
+    if not bot_response:
+        if "not working" in user_input or "issue not fixed" in user_input:
+            session["awaiting_location"] = True
+            return jsonify({"response": "I see the issue persists. Can you share your location to find a service center?"})
+        else:
+            return jsonify({"response": "I'm not sure. Can you describe the issue in more detail?"})
+
+    # If user was asked for location, fetch service centers
+    if session.get("awaiting_location"):
+        session.pop("awaiting_location")
+        service_centers = get_nearby_service_centers(user_input)
+
+        if service_centers:
+            response_text = "Here are the top-rated service centers near you:\n"
+            for center in service_centers:
+                response_text += f"📍 {center['center_name']} ({center['rating']}⭐) - {center['location']}\n"
+            response_text += "Would you like to book an appointment?"
+        else:
+            response_text = "Sorry, no service centers found near you."
+
+        return jsonify({"response": response_text})
+
+    # Store chat logs
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO chat_logs (user_id, user_message, bot_response) VALUES (%s, %s, %s)", 
+                   (user_id, user_input, bot_response))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({"response": bot_response})
+
+# 🔹 Logout
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("Logged out successfully!", "info")
+    return redirect("/login")
+
+if __name__ == "__main__":
+    app.run(debug=True)

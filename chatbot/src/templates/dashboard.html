@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <style>
+        /* Ensure full-page scrolling */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: auto;
+            overflow-y: scroll;
+        }
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        /* Table styling */
+        #appointments {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #appointments th, #appointments td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        #appointments th {
+            background-color: #f2f2f2;
+        }
+        /* Past appointment row styling */
+        .past-appointment {
+            background-color: #f9f9f9;
+            color: #666;
+        }
+        .past-appointment td {
+            font-style: italic;
+        }
+        /* Feedback form */
+        .feedback-form {
+            margin-top: 10px;
+        }
+        .feedback-form input[type="number"] {
+            width: 50px;
+        }
+        .feedback-form textarea {
+            width: 100%;
+            height: 60px;
+        }
+        .feedback-form button {
+            background: #28a745;
+            border: none;
+            padding: 5px 10px;
+            color: white;
+            cursor: pointer;
+        }
+        .feedback-form button:hover {
+            background: #218838;
+        }
+        .reviews-section {
+            margin-top: 20px;
+        }
+        .review {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h2>Welcome, {{ username }}!</h2>
+
+        <div class="actions">
+            <a href="/appointment"><button>📅 Book Appointment</button></a>
+            <a href="/chatbot"><button>💬 Chat with Support</button></a>
+            <a href="/logout"><button>🚪 Logout</button></a>
+        </div>
+
+        <h3>Your Appointments</h3>
+        <table id="appointments">
+            <tr>
+                <th>Service Center</th>
+                <th>Time Slot</th>
+                <th>Average Rating</th>
+                <th>Feedback</th>
+            </tr>
+            {% for appt in appointments %}
+            <tr {% if appt.time_slot < now %}class="past-appointment"{% endif %}>
+                <td>{{ appt.center_name }}</td>
+                <td>{{ appt.time_slot }} {% if appt.time_slot < now %}(Past){% endif %}</td>
+                <td>{{ appt.rating|default(0.0)|round(1) }} ⭐</td>
+                <td>
+                    {% if appt.time_slot >= now %}
+                    <form class="feedback-form" id="review-form-{{ appt.id }}-{{ appt.service_center_id }}">
+                        <input type="hidden" name="service_center_id" value="{{ appt.service_center_id }}">
+                        <input type="hidden" name="appointment_id" value="{{ appt.id }}">
+                        <label>Rating:</label>
+                        <input type="number" name="rating" min="1" max="5" required>
+                        <label>Comment:</label>
+                        <textarea name="comment" placeholder="Optional comment"></textarea>
+                        <button type="button" onclick="submitReview('review-form-{{ appt.id }}-{{ appt.service_center_id }}')">Submit</button>
+                    </form>
+                    {% else %}
+                    <p>Review period closed</p>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% if not appointments %}
+        <p>No appointments found.</p>
+        {% endif %}
+
+        <h3>Your Reviews</h3>
+        <div class="reviews-section">
+            {% if reviews %}
+                {% for review in reviews %}
+                    <div class="review">
+                        <p><strong>Service Center:</strong> {{ review.center_name }}</p>
+                        <p><strong>Your Rating:</strong> {{ review.user_rating }} ⭐</p>
+                        <p><strong>Comment:</strong> {{ review.comment or 'No comment' }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No reviews submitted yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Pass current time from server to client
+        const now = new Date("{{ now }}");
+
+        function submitReview(formId) {
+            const form = document.getElementById(formId);
+            const serviceCenterId = form.querySelector('input[name="service_center_id"]').value;
+            const appointmentId = form.querySelector('input[name="appointment_id"]').value;
+            const rating = form.querySelector('input[name="rating"]').value;
+            const comment = form.querySelector('textarea[name="comment"]').value;
+
+            console.log("Submitting review:", {
+                service_center_id: serviceCenterId,
+                appointment_id: appointmentId,
+                rating: rating,
+                comment: comment
+            });
+
+            if (!serviceCenterId || !appointmentId || !rating || serviceCenterId === "" || appointmentId === "" || rating === "") {
+                alert("Please provide both a service center ID, appointment ID, and a rating.");
+                return;
+            }
+
+            fetch('/api/submit-review', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    service_center_id: serviceCenterId,
+                    appointment_id: appointmentId,
+                    rating: rating,
+                    comment: comment
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.scrollTo(0, 0);
+                    setTimeout(() => location.reload(), 100);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting review:', error);
+                alert('An error occurred while submitting your review.');
+            });
+        }
+
+        window.addEventListener('load', function() {
+            window.scrollTo(0, 0);
+        });
+    </script>
+</body>
+</html>

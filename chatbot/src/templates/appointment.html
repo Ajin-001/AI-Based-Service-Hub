@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment</title>
+    <link rel="stylesheet" href="/static/css/appointment.css">
+    <style>
+        /* Ensure full-page scrolling and consistent base styling */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: auto;
+            overflow-y: scroll;
+            font-family: Arial, sans-serif;
+            color: #111111; /* Make all text black by default */
+        }
+        .appointment-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        p {
+            margin: 10px 0;
+        }
+        /* Date Picker Styling */
+        #date-picker {
+            padding: 5px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+            color: #000000; /* Black text */
+        }
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        /* Actions Section */
+        .actions {
+            margin-bottom: 20px;
+        }
+        .actions button {
+            margin-right: 10px;
+        }
+        /* Service Center Card */
+        .service-center {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .service-center h3 {
+            margin-top: 0;
+            font-size: 20px;
+        }
+        .service-center h4 {
+            margin: 15px 0 10px;
+            font-size: 16px;
+        }
+        .service-center p {
+            margin: 5px 0;
+        }
+        /* Time Slots */
+        .time-slot {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #28a745;
+            color: white; /* White text for contrast */
+            text-align: center;
+            min-width: 80px;
+        }
+        .time-slot.booked {
+            background-color: #ff4444;
+            cursor: not-allowed;
+        }
+        .time-slot.selected {
+            background-color: #218838;
+            border-color: #28a745;
+        }
+        .time-slot:hover:not(.booked) {
+            background-color: #218838;
+        }
+        /* Buttons */
+        button {
+            background: #007BFF;
+            color: white; /* White text for contrast */
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="appointment-container">
+        <h1>Book Appointment</h1>
+        <div class="actions">
+            <a href="/dashboard"><button>🏠 Dashboard</button></a>
+        </div>
+        <p>Select a date, then a service center and time slot:</p>
+        <label for="date-picker">Choose Date:</label>
+        <input type="date" id="date-picker">
+
+        {% for center in service_centers %}
+        <div class="service-center">
+            <h3>{{ center.center_name }}</h3>
+            <p><strong>Location:</strong> {{ center.location }}</p>
+            <p><strong>Contact:</strong> {{ center.contact_number }}</p>
+            <p><strong>Rating:</strong> {{ center.rating|default(0.0)|round(1) }} ⭐</p>
+
+            <h4>Available Time Slots:</h4>
+            <div id="slots-{{ center.id }}">
+                <!-- Time slots will be dynamically populated here -->
+            </div>
+            <button onclick="bookAppointment({{ center.id }})">Book Appointment</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        let selectedSlots = {};
+
+        function fetchTimeSlots(centerId, date) {
+            fetch(`/api/time-slots?center_id=${centerId}&date=${date}`)
+                .then(response => response.json())
+                .then(data => {
+                    const slotContainer = document.getElementById(`slots-${centerId}`);
+                    slotContainer.innerHTML = "";
+
+                    data.slots.forEach(slot => {
+                        const slotElement = document.createElement("div");
+                        slotElement.className = slot.booked ? "time-slot booked" : "time-slot";
+                        slotElement.innerText = slot.time;
+                        if (!slot.booked) {
+                            slotElement.onclick = () => selectTimeSlot(centerId, slot.time);
+                        }
+                        slotContainer.appendChild(slotElement);
+                    });
+                })
+                .catch(error => console.error("Error fetching time slots:", error));
+        }
+
+        function selectTimeSlot(centerId, time) {
+            const slots = document.querySelectorAll(`#slots-${centerId} .time-slot`);
+            slots.forEach(slot => slot.classList.remove("selected"));
+
+            const selectedSlot = Array.from(slots).find(slot => slot.innerText === time);
+            if (selectedSlot) {
+                selectedSlot.classList.add("selected");
+                selectedSlots[centerId] = time;
+                console.log(`Selected time for center ${centerId}: ${time}`);
+            }
+        }
+
+        function bookAppointment(centerId) {
+            const selectedTime = selectedSlots[centerId];
+            if (!selectedTime) {
+                alert("Please select a time slot first!");
+                return;
+            }
+
+            const date = document.getElementById("date-picker").value;
+            if (!date) {
+                alert("Please select a date first!");
+                return;
+            }
+
+            const userId = {{ session['user_id'] | tojson | safe }};
+            console.log(`Booking center ${centerId} at ${selectedTime} on ${date}`);
+            fetch("/api/book-appointment", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    center_id: centerId,
+                    time: selectedTime,
+                    user_id: userId,
+                    date: date
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Booking response:", data);
+                if (data.success) {
+                    alert("Appointment booked successfully!");
+                    fetchTimeSlots(centerId, date);
+                    delete selectedSlots[centerId];
+                } else {
+                    alert(`Failed to book appointment: ${data.error || "Unknown error"}`);
+                }
+            })
+            .catch(error => {
+                console.error("Error booking appointment:", error);
+                alert("An error occurred while booking. Please try again.");
+            });
+        }
+
+        window.onload = () => {
+            const datePicker = document.getElementById("date-picker");
+            const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+            datePicker.value = today; // Set default to today
+            const initialDate = datePicker.value;
+
+            {% for center in service_centers %}
+            fetchTimeSlots({{ center.id }}, initialDate);
+            {% endfor %}
+
+            datePicker.addEventListener("change", () => {
+                const newDate = datePicker.value;
+                {% for center in service_centers %}
+                fetchTimeSlots({{ center.id }}, newDate);
+                delete selectedSlots[{{ center.id }}];
+                {% endfor %}
+            });
+        };
+    </script>
+</body>
+</html>
