@@ -1,0 +1,226 @@
+[
+    {
+        "user_message": "hello",
+        "bot_response": "Hello! How can I assist you today?"
+    },
+    {
+        "user_message": "hi",
+        "bot_response": "Hi there! What can I help you with?"
+    },
+    {
+        "user_message": "hey",
+        "bot_response": "Hey! Need any help?"
+    },
+    {
+        "user_message": "bye",
+        "bot_response": "Goodbye! Have a great day!"
+    },
+    {
+        "user_message": "thanks",
+        "bot_response": "You're welcome! Let me know if you need anything else."
+    },
+    {
+        "user_message": "thank you",
+        "bot_response": "You're welcome! Happy to help."
+    },
+    {
+        "user_message": "my phone won't turn on",
+        "bot_response": "Here are a few things to try:\n1. Charge your phone with a known working charger for at least 10-15 minutes.\n2. Try using a different charger or cable.\n3. Perform a hard reset by holding the power button and volume buttons (varies by model).\nIf none of these work, your battery or hardware may be faulty."
+    },
+    {
+        "user_message": "my phone is completely dead and won't power up",
+        "bot_response": "If your phone is completely unresponsive:\n1. Plug it into a charger and wait for 15-20 minutes.\n2. Try a different charger or cable.\n3. Perform a hard reset (check your phone's manual for instructions).\nIf it still doesn’t turn on, the battery or hardware might need repair."
+    },
+    {
+        "user_message": "my phone is stuck on the logo screen",
+        "bot_response": "This is usually a software issue. Try these steps:\n1. Perform a force restart (varies by model).\n2. Boot into recovery mode and clear the cache.\n3. If the issue persists, you may need to perform a factory reset.\n4. If none of these work, visit a service center."
+    },
+    {
+        "user_message": "my phone keeps showing the startup logo and won't go further",
+        "bot_response": "If your phone is stuck at the startup logo:\n1. Force restart your phone (check your model's instructions).\n2. Boot into recovery mode and clear the cache.\n3. If the problem persists, a factory reset might be necessary.\n4. If nothing works, it could be a hardware issue."
+    },
+    {
+        "user_message": "my phone screen is not displaying anything",
+        "bot_response": "Try these steps:\n1. Check if the phone is powered on by pressing the power button.\n2. If the screen is black but the phone vibrates, try a force restart.\n3. Connect to a charger and ensure the battery isn’t dead.\n4. If the screen is cracked or damaged, visit a repair center."
+    },
+    {
+        "user_message": "my phone screen is black and won't turn on",
+        "bot_response": "If your screen is black:\n1. Press and hold the power button for 10-15 seconds to force restart.\n2. Check if the battery is charged by plugging it in.\n3. If the phone vibrates or makes sounds but the screen stays black, the display might be damaged.\n4. Visit a repair center for further diagnosis."
+    },
+    {
+        "user_message": "my phone is overheating",
+        "bot_response": "Try these steps to cool it down:\n1. Close unused apps running in the background.\n2. Remove the phone case to help heat dissipate.\n3. Avoid using your phone while charging.\n4. Keep it away from direct sunlight.\nIf overheating persists, there may be a hardware issue."
+    },
+    {
+        "user_message": "my phone gets too hot even when I'm not using it",
+        "bot_response": "If your phone overheats when idle:\n1. Check for apps running in the background and close them.\n2. Update your phone's software to the latest version.\n3. Restart your phone to clear any glitches.\n4. If the issue continues, it could be a battery or hardware problem."
+    },
+    {
+        "user_message": "my phone battery is draining fast",
+        "bot_response": "Here are some ways to fix battery drain issues:\n1. Check which apps are consuming the most battery in settings.\n2. Close background apps and disable unnecessary features.\n3. Reduce screen brightness and enable power-saving mode.\n4. If the battery is old, consider getting a replacement."
+    },
+    {
+        "user_message": "my phone battery dies too quickly",
+        "bot_response": "If your battery drains too fast:\n1. Check for battery-hogging apps in settings.\n2. Turn off features like GPS, Bluetooth, and WiFi when not in use.\n3. Enable battery saver mode.\n4. If the battery is old or damaged, consider replacing it."
+    },
+    {
+        "user_message": "my phone won't connect to wifi",
+        "bot_response": "Here's what to do:\n1. Turn WiFi off and on again.\n2. Restart both your phone and router.\n3. Forget the WiFi network and reconnect with the correct password.\n4. Make sure no other devices are causing interference.\nIf the problem continues, check if your router needs a firmware update."
+    },
+    {
+        "user_message": "my phone can't find any wifi networks",
+        "bot_response": "If your phone can't detect WiFi networks:\n1. Ensure WiFi is turned on in settings.\n2. Restart your phone and router.\n3. Check if Airplane mode is disabled.\n4. If the issue persists, there might be a problem with your phone's WiFi hardware."
+    },
+    {
+        "user_message": "my phone is charging very slowly",
+        "bot_response": "Try these fixes:\n1. Use an original or high-quality charger.\n2. Check for dust or lint in the charging port.\n3. Avoid using the phone while charging.\n4. If the issue persists, try a different power outlet or cable."
+    },
+    {
+        "user_message": "my phone takes forever to charge",
+        "bot_response": "If your phone charges too slowly:\n1. Use the original charger and cable.\n2. Clean the charging port with a soft brush or compressed air.\n3. Avoid using the phone while charging.\n4. If the problem continues, the battery or charging port may need repair."
+    },
+    {
+        "user_message": "my phone speaker is not working",
+        "bot_response": "Here is what to do:\n1. Check if the phone is on silent or Do Not Disturb mode.\n2. Restart your phone and test the speaker with different apps.\n3. Clean the speaker grill to remove dust or debris.\n4. If sound works with headphones but not without, the speaker may need repair."
+    },
+    {
+        "user_message": "my phone has no sound at all",
+        "bot_response": "If there's no sound from your phone:\n1. Check if the volume is turned up and not on silent mode.\n2. Restart your phone.\n3. Test with headphones to see if the issue is with the speaker.\n4. If the problem persists, the speaker or audio hardware may need repair."
+    },
+    {
+        "user_message": "my phone touchscreen is not responding",
+        "bot_response": "Try these solutions:\n1. Clean the screen and remove any dirt or moisture.\n2. Restart your phone to refresh the system.\n3. Remove any screen protectors that might interfere with touch sensitivity.\n4. If it is a specific app causing the issue, try reinstalling it."
+    },
+    {
+        "user_message": "my phone screen is not working properly",
+        "bot_response": "If your touchscreen is unresponsive:\n1. Restart your phone.\n2. Remove any screen protectors or cases that might interfere.\n3. Check for software updates.\n4. If the issue persists, the screen or digitizer may need repair."
+    },
+    {
+        "user_message": "my phone is not receiving calls",
+        "bot_response": "Here’s what to check:\n1. Ensure your phone is not in Do Not Disturb or Airplane mode.\n2. Check if call forwarding is enabled.\n3. Restart your phone and check for carrier updates.\n4. If the issue persists, contact your carrier."
+    },
+    {
+        "user_message": "people can't call me on my phone",
+        "bot_response": "If calls aren't coming through:\n1. Check if Do Not Disturb or Airplane mode is on.\n2. Restart your phone.\n3. Verify your carrier settings and network connection.\n4. If the problem continues, contact your carrier for assistance."
+    },
+    {
+        "user_message": "my phone is not sending texts",
+        "bot_response": "Try these steps:\n1. Check if your phone has a signal.\n2. Ensure your messaging app is updated.\n3. Restart your phone and check for carrier updates.\n4. If the issue persists, contact your carrier."
+    },
+    {
+        "user_message": "my texts are not going through",
+        "bot_response": "If your texts aren't sending:\n1. Check your network connection.\n2. Restart your phone.\n3. Verify your messaging app settings.\n4. If the issue persists, contact your carrier for further assistance."
+    },
+    {
+        "user_message": "my phone is not detecting my SIM card",
+        "bot_response": "Try these steps:\n1. Remove and reinsert the SIM card.\n2. Clean the SIM card and tray.\n3. Restart your phone.\n4. If the issue persists, your SIM card or phone may need repair."
+    },
+    {
+        "user_message": "my phone says no SIM card detected",
+        "bot_response": "If your phone can't detect the SIM card:\n1. Remove the SIM card and clean it with a soft cloth.\n2. Reinsert the SIM card carefully.\n3. Restart your phone.\n4. If the problem continues, try another SIM card or visit a service center."
+    },
+    {
+        "user_message": "my phone is not updating",
+        "bot_response": "Here’s what to do:\n1. Ensure your phone is connected to WiFi.\n2. Check if you have enough storage space.\n3. Restart your phone and try again.\n4. If the issue persists, manually update via recovery mode."
+    },
+    {
+        "user_message": "my phone won't install the latest update",
+        "bot_response": "If your phone won't update:\n1. Check your internet connection.\n2. Free up storage space by deleting unnecessary files.\n3. Restart your phone and try again.\n4. If the update still fails, try updating manually via recovery mode."
+    },
+    {
+        "user_message": "my phone camera is blurry",
+        "bot_response": "Fix blurry camera issues with these steps:\n1. Clean the camera lens with a soft cloth.\n2. Check if there is a plastic protector covering the lens and remove it.\n3. Restart the phone and try different camera modes.\n4. If autofocus isn't working, update the camera app or reset camera settings."
+    },
+    {
+        "user_message": "my phone photos are not clear",
+        "bot_response": "If your photos are blurry:\n1. Clean the camera lens.\n2. Ensure the lens isn't scratched or damaged.\n3. Restart your phone and test the camera again.\n4. If the issue persists, the camera hardware may need repair."
+    },
+    {
+        "user_message": "my phone is not charging",
+        "bot_response": "Try these steps:\n1. Use a different charger or cable.\n2. Check for debris in the charging port and clean it carefully.\n3. Restart your phone.\n4. If the issue persists, the charging port or battery may need repair."
+    },
+    {
+        "user_message": "my phone won't charge at all",
+        "bot_response": "If your phone won't charge:\n1. Try a different charger and cable.\n2. Clean the charging port with a soft brush or compressed air.\n3. Restart your phone.\n4. If it still doesn't charge, the battery or charging port may need repair."
+    },
+    {
+        "user_message": "my phone is frozen",
+        "bot_response": "Here’s what to do:\n1. Perform a force restart (varies by model).\n2. If the screen is unresponsive, wait for the battery to drain and then recharge.\n3. Boot into safe mode to check if a third-party app is causing the issue.\n4. If the problem continues, consider a factory reset."
+    },
+    {
+        "user_message": "my phone is stuck and won't respond",
+        "bot_response": "If your phone is frozen:\n1. Force restart your phone (check your model's instructions).\n2. Boot into safe mode to check for problematic apps.\n3. If the issue persists, back up your data and perform a factory reset."
+    },
+    {
+        "user_message": "my phone is not connecting to Bluetooth",
+        "bot_response": "Try these steps:\n1. Turn Bluetooth off and on.\n2. Remove and re-pair the device.\n3. Restart your phone and the Bluetooth device.\n4. Check for system updates that may fix compatibility issues."
+    },
+    {
+        "user_message": "my phone can't find Bluetooth devices",
+        "bot_response": "If your phone can't detect Bluetooth devices:\n1. Ensure Bluetooth is turned on.\n2. Restart your phone and the Bluetooth device.\n3. Check if the device is in pairing mode.\n4. If the issue persists, update your phone's software."
+    },
+    {
+        "user_message": "my phone is not recognizing my fingerprint",
+        "bot_response": "Here’s what to do:\n1. Clean the fingerprint sensor and your finger.\n2. Re-register your fingerprint in settings.\n3. Restart your phone.\n4. If the issue persists, the sensor may need repair."
+    },
+    {
+        "user_message": "my fingerprint sensor is not working",
+        "bot_response": "If your fingerprint sensor isn't working:\n1. Clean the sensor and your finger.\n2. Re-register your fingerprint.\n3. Restart your phone.\n4. If the problem continues, the sensor may need repair."
+    },
+    {
+        "user_message": "my phone storage is full",
+        "bot_response": "Here is how to free up space:\n1. Delete unnecessary apps and files.\n2. Clear cache data in settings.\n3. Move photos and videos to cloud storage or an SD card.\n4. Use a storage management tool to optimize space automatically."
+    },
+    {
+        "user_message": "my phone says storage is full",
+        "bot_response": "If your phone storage is full:\n1. Delete unused apps and files.\n2. Clear app caches in settings.\n3. Transfer photos and videos to cloud storage.\n4. Use a storage cleaner app to free up space."
+    },
+    {
+        "user_message": "my phone is very slow",
+        "bot_response": "A slow phone can be frustrating! Try these steps:\n1. Clear app cache and unused files.\n2. Restart your device.\n3. Uninstall apps you don’t use.\nIf the issue persists, I can suggest more fixes."
+    },
+    {
+        "user_message": "my phone is lagging and slow",
+        "bot_response": "If your phone is lagging:\n1. Close background apps.\n2. Clear cache and free up storage space.\n3. Restart your phone.\n4. If the issue persists, consider a factory reset after backing up your data."
+    },
+    {
+        "user_message": "my phone keeps restarting on its own",
+        "bot_response": "Try these solutions:\n1. Check if any recently installed apps are causing the issue and uninstall them.\n2. Update your phone’s software to the latest version.\n3. If overheating, let the phone cool down before using it.\n4. A factory reset may be needed if the issue continues."
+    },
+    {
+        "user_message": "my phone randomly restarts",
+        "bot_response": "If your phone restarts randomly:\n1. Check for problematic apps and uninstall them.\n2. Update your phone's software.\n3. Ensure your phone isn't overheating.\n4. If the issue persists, a factory reset or hardware repair may be needed."
+    },
+    {
+        "user_message": "my phone is not receiving notifications",
+        "bot_response": "Here’s what to check:\n1. Ensure notifications are enabled for the app in settings.\n2. Check if Do Not Disturb or Battery Saver mode is on.\n3. Restart your phone.\n4. If the issue persists, reinstall the app or check for system updates."
+    },
+    {
+        "user_message": "I'm not getting any notifications on my phone",
+        "bot_response": "If you're not receiving notifications:\n1. Check app notification settings.\n2. Ensure Do Not Disturb mode is off.\n3. Restart your phone.\n4. If the issue continues, reinstall the app or update your phone's software."
+    },
+    {
+        "user_message": "my phone is not syncing with my smartwatch",
+        "bot_response": "Here’s what to check:\n1. Ensure Bluetooth is enabled on both devices.\n2. Restart both your phone and smartwatch.\n3. Update the companion app and your phone’s software.\n4. If the issue persists, reset the smartwatch and re-pair it."
+    },
+    {
+        "user_message": "my phone won't connect to my smartwatch",
+        "bot_response": "If your phone won't sync with your smartwatch:\n1. Turn Bluetooth off and on.\n2. Restart both devices.\n3. Update the smartwatch app and your phone's software.\n4. If the issue persists, reset the smartwatch and try pairing again."
+    },
+    {
+        "user_message": "my phone is not connecting to my car",
+        "bot_response": "Try these steps:\n1. Ensure Bluetooth is enabled on both devices.\n2. Remove and re-pair your phone with the car.\n3. Restart both your phone and the car’s infotainment system.\n4. Check for software updates on both devices."
+    },
+    {
+        "user_message": "my phone won't connect to my car's Bluetooth",
+        "bot_response": "If your phone won't connect to your car:\n1. Turn Bluetooth off and on.\n2. Remove your phone from the car's paired devices list and re-pair.\n3. Restart both your phone and the car's system.\n4. Check for software updates on both devices."
+    },
+    {
+        "user_message": "my phone is not charging wirelessly",
+        "bot_response": "Here’s what to check:\n1. Ensure your phone supports wireless charging.\n2. Remove any phone case that might interfere.\n3. Place your phone correctly on the charging pad.\n4. If the issue persists, try a different wireless charger."
+    },
+    {
+        "user_message": "my phone won't charge on the wireless charger",
+        "bot_response": "If wireless charging isn't working:\n1. Ensure your phone is compatible with wireless charging.\n2. Remove any thick cases or metal objects.\n3. Place your phone properly on the charging pad.\n4. If it still doesn't work, try a different wireless charger."
+    }
+]
