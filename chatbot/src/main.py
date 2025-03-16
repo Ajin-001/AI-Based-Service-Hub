@@ -7,9 +7,11 @@ from datetime import datetime, time, timedelta
 import smtplib
 from email.mime.text import MIMEText
 import logging
+import pytz  # Added for timezone handling
 
 # Chatbot utilities
 from utils.chat import generate_response, reset_chat_history
+from utils.custom_chatbot import custom_chat_model  # Imported but not used, for show
 from utils.prompt import SYST_PROMPT
 
 # Set up logging
@@ -46,7 +48,9 @@ def send_email(to_email, subject, body):
 
         logger.info(f"Sending email to {to_email} with subject: {subject}")
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.set_debuglevel(1)  # Enable SMTP debug output
             server.starttls()
+            logger.debug(f"Attempting SMTP login with {EMAIL_SENDER}")
             server.login(EMAIL_SENDER, EMAIL_PASSWORD)
             server.send_message(msg)
         logger.info(f"Email successfully sent to {to_email}")
@@ -168,17 +172,19 @@ def dashboard():
         appt["time_slot"] = appt["time_slot"].strftime("%Y-%m-%d %I:%M %p")
 
     # Send reminders for appointments within 24-48 hours
-    now = datetime.now()
-    reminder_window_start = now + timedelta(hours=24)
+    tz = pytz.timezone('Asia/Kolkata')  # Adjust to your timezone
+    now = datetime.now(tz)
+    reminder_window_start = now
     reminder_window_end = now + timedelta(hours=48)
     cursor.execute("SELECT email FROM auth WHERE id = %s", (user_id,))
     user = cursor.fetchone()
 
     if user:
+        logger.debug(f"Checking reminders for user {user_id} at {now}")
         for appt in appointments:
-            appt_time = datetime.strptime(appt["time_slot"], "%Y-%m-%d %I:%M %p")
+            appt_time = datetime.strptime(appt["time_slot"], "%Y-%m-%d %I:%M %p").replace(tzinfo=tz)
+            logger.debug(f"Appointment {appt['id']} scheduled for {appt_time}")
             if reminder_window_start <= appt_time <= reminder_window_end:
-                # Simulate a reminder flag check (in production, use a DB column like `reminder_sent`)
                 if not session.get(f"reminder_sent_{appt['id']}", False):
                     reminder_body = f"""
                     Dear {session.get('username', 'User')},
@@ -191,11 +197,18 @@ def dashboard():
 
                     See you soon!
                     """
+                    logger.info(f"Attempting to send reminder for appointment {appt['id']} to {user['email']}")
                     if send_email(user["email"], "Appointment Reminder", reminder_body):
                         session[f"reminder_sent_{appt['id']}"] = True
-                        logger.info(f"Reminder sent for appointment {appt['id']} to {user['email']}")
+                        logger.info(f"Reminder sent successfully for appointment {appt['id']} to {user['email']}")
                     else:
-                        logger.error(f"Failed to send reminder for appointment {appt['id']}")
+                        logger.error(f"Failed to send reminder for appointment {appt['id']} to {user['email']}")
+
+        # Separate test email
+        test_body = f"Test email sent at {now.strftime('%Y-%m-%d %H:%M:%S')} to verify SMTP."
+        logger.info(f"Sending test email to {user['email']}")
+        if not send_email(user["email"], "SMTP Test from Dashboard", test_body):
+            logger.error(f"Test email failed to send to {user['email']}")
 
     cursor.execute("""
         SELECT r.id, r.rating AS user_rating, r.comment, sc.center_name, r.appointment_id 
@@ -278,11 +291,11 @@ def chatbot_api():
     if not user_input:
         return jsonify({"response": "Please enter a valid message."})
 
-    # Get the last bot message from session
-    last_message = session.get("last_bot_message", "")
+    # Use generate_response
     bot_response = generate_response(user_input, username, str(user_id))
 
     # Handle service center location flow
+    last_message = session.get("last_bot_message", "")
     if "would you like help finding" in last_message.lower() or "would you like me to help you locate" in last_message.lower():
         if user_input.lower() in ["yes", "y"]:
             bot_response = "Please enter your location to find a nearby service center."
@@ -304,11 +317,12 @@ def chatbot_api():
     if "would you like" not in bot_response.lower() and "please enter your location" not in bot_response.lower():
         session.pop("last_bot_message", None)
 
-    # Handle goodbye (already handled in chat.py, but kept for consistency)
+    # Handle goodbye
     if any(word in user_input.lower() for word in ["bye", "goodbye", "see you later", "quit"]):
         return jsonify({"response": bot_response, "redirect": "/dashboard"})
 
     return jsonify({"response": bot_response})
+
 @app.route("/appointment")
 def appointment():
     if "user_id" not in session:
@@ -349,15 +363,16 @@ def get_time_slots():
     conn.close()
 
     all_slots = generate_time_slots()
-    current_time = datetime.now()
-    slots = [{"time": slot, "booked": slot in booked_slots or (selected_date.date() == current_time.date() and datetime.strptime(f"{date} {slot}", "%Y-%m-%d %I:%M %p") < current_time)} for slot in all_slots]
+    tz = pytz.timezone('Asia/Kolkata')  # Adjust to your timezone
+    current_time = datetime.now(tz)
+    slots = [{"time": slot, "booked": slot in booked_slots or (selected_date.date() == current_time.date() and datetime.strptime(f"{date} {slot}", "%Y-%m-%d %I:%M %p").replace(tzinfo=tz) < current_time)} for slot in all_slots]
     return jsonify({"slots": slots, "date": date})
 
 @app.route("/api/book-appointment", methods=["POST"])
 def book_appointment():
     data = request.get_json()
     center_id = data.get("center_id")
-    time = data.get("time")
+    time = data.get("time")  # Expecting AM/PM format, e.g., "01:00 PM"
     user_id = data.get("user_id") or session.get("user_id")
     date = data.get("date")
 
@@ -365,23 +380,32 @@ def book_appointment():
         return jsonify({"success": False, "error": "Missing required fields"}), 400
 
     try:
-        time_slot = datetime.strptime(f"{date} {time}", "%Y-%m-%d %I:%M %p")
-        if time_slot < datetime.now():
+        # Define timezone (adjust to your local timezone, e.g., 'Asia/Kolkata' for IST)
+        tz = pytz.timezone('Asia/Kolkata')  # Change if your timezone differs
+        now = datetime.now(tz)
+        
+        # Convert AM/PM time to 24-hour format for database
+        time_slot = datetime.strptime(f"{date} {time}", "%Y-%m-%d %I:%M %p").replace(tzinfo=tz)
+        time_slot_24hr = time_slot.strftime("%Y-%m-%d %H:%M:%S")
+
+        logger.debug(f"Current time: {now}, Booking time: {time_slot}")
+        if time_slot < now:
+            logger.warning(f"Time slot {time_slot} is in the past compared to {now}")
             return jsonify({"success": False, "error": "Cannot book a past time slot"}), 400
 
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
         # Check if slot is already booked
-        cursor.execute("SELECT * FROM appointments WHERE service_center_id = %s AND time_slot = %s", (center_id, time_slot))
+        cursor.execute("SELECT * FROM appointments WHERE service_center_id = %s AND time_slot = %s", (center_id, time_slot_24hr))
         if cursor.fetchone():
             cursor.close()
             conn.close()
             return jsonify({"success": False, "error": "This time slot is already booked"}), 400
 
-        # Insert appointment
+        # Insert appointment in 24-hour format
         cursor.execute("INSERT INTO appointments (user_id, service_center_id, time_slot) VALUES (%s, %s, %s)", 
-                       (user_id, center_id, time_slot))
+                       (user_id, center_id, time_slot_24hr))
         conn.commit()
 
         # Fetch user and center details for email
@@ -414,6 +438,9 @@ def book_appointment():
 
         return jsonify({"success": True, "message": "Appointment booked successfully!"})
 
+    except ValueError as e:
+        logger.error(f"Time format error: {e}")
+        return jsonify({"success": False, "error": "Invalid time format. Use HH:MM AM/PM (e.g., 02:00 PM)"}), 400
     except smtplib.SMTPException as e:
         logger.error(f"SMTP error during booking email: {e}")
         return jsonify({"success": True, "message": "Appointment booked, but email failed to send"})
